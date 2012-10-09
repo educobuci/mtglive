@@ -8,12 +8,12 @@ window.App.gameController = Ember.Object.create
     lib: 48
   update: ->
     $.get "game.json", (data) ->
-      players = data.players
+      me = data.me
 
-      App.Player1BattlefieldView.set "cards", players[0].battlefield.map (obj, index) ->
+      App.Player1BattlefieldView.set "cards", me.battlefield.map (obj, index) ->
         Em.Object.create obj, { number: index }
 
-      App.PlayerHandView.set "cards", players[0].hand.map (obj, index) ->
+      App.PlayerHandView.set "cards", me.hand.map (obj, index) ->
         Em.Object.create obj, { number: index }
     
 window.App.PlayerView = Em.View.extend

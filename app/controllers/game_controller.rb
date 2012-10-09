@@ -20,6 +20,7 @@ class GameController < ApplicationController
       @@game = Game.new [Player.new, Player.new]
       @@game.start
     end
-    respond_with @@game
+    @player_game = { me: @@game.players(session[:player]) }
+    respond_with @player_game
   end
 end
