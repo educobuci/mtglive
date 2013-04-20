@@ -1,4 +1,8 @@
 Mtglive::Application.routes.draw do
+  faye_server '/faye', :timeout => 25 do
+    add_extension(GameExtension.new)
+  end
+    
   match ':controller(/:action(/:id))(.:format)'
   # The priority is based upon order of creation:
   # first created -> highest priority.

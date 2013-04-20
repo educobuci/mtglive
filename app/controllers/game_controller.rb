@@ -15,12 +15,18 @@ class GameController < ApplicationController
     @@game.tap_card(params[:card].to_i)
     render text: ""
   end
+  def pass_phase
+    @@game.next_phase
+    render text: ""
+  end
   def game
     if @@game.nil?
       @@game = Game.new [Player.new, Player.new]
-      @@game.start
     end
-    @player_game = { me: @@game.players(session[:player]) }
+    @player_game = { phase: @@game.current_phase, player: @@game.current_player_index, me: @@game.players(session[:player]) }
     respond_with @player_game
+  end
+  def play
+    
   end
 end

@@ -14,4 +14,6 @@
 //= require jquery_ujs
 //= require handlebars
 //= require ember
-//= require app
+// require app
+//= require faye-browser-min
+//= require play

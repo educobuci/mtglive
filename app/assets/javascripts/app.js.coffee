@@ -33,14 +33,15 @@ window.App.Player1BattlefieldView = Ember.View.create
   templateName: "cards"
   cards:[]
 
-App.Player1BattlefieldView.appendTo "#player-1 .creatures"
-App.PlayerHandView.appendTo "#hand"
-
 $ ->
+  App.Player1BattlefieldView.appendTo "#player-1 .creatures"
+  App.PlayerHandView.appendTo "#hand"
+  
   App.gameController.update()
   
   $("#phase_bar").click ->
-    window.App.gameController.update()
+    $.get "/game/pass_phase", ->
+      window.App.gameController.update()
     
   $("#hand .card").live "click", ->
     number = $(this).attr("data-number")
