@@ -21,6 +21,7 @@ $ ->
           opponent = p
       if msg.value[userName] > msg.value[opponent]
         alert "Want to start?"
+        client.publish "/play/#{userName}", { type: "start_player" }
       else
         alert "Waiting #{opponent} decide"
         
