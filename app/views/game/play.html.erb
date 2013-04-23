@@ -1,3 +1,11 @@
+<script type="text/x-handlebars" data-template-name="cards">
+  {{#each cards}}
+  <div {{bindAttr data-number="number"}} {{bindAttr class=":card tapped:tapped"}}>
+    <img {{bindAttr src="image"}}>
+  </div>
+  {{/each}}
+</script>
+
 <div id="frame">
   <div id="players_bar">
     <div class="player">
@@ -72,47 +80,41 @@
     <div class="wrapper">
       <div class="board">
           <div class="lands">
-            <div class="card">
+            <!-- <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=253680&amp;type=card">
-            </div>
+            </div> -->
           </div>
           <div class="creatures">
-            <div class="card">
+            <!-- <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=235597&amp;type=card">    
             </div>
             <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=235597&amp;type=card">    
-            </div>
+            </div> -->
           </div>
       </div>      
     </div>
     <div class="wrapper">
       <div class="board">
           <div class="creatures">
-            <div class="card">
+            <!-- <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=235597&amp;type=card">    
             </div>
             <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=235597&amp;type=card">    
-            </div>
+            </div> -->
           </div>
           <div class="lands">
-            <div class="card">
+            <!-- <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=253680&amp;type=card">
-            </div>
+            </div> -->
           </div>
       </div>      
     </div>
     <div id="hand">
-      <div class="card">
+      <!--div class="card">
         <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=253680&amp;type=card">
-      </div>
-      <div class="card">
-        <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=253680&amp;type=card">
-      </div>
-      <div class="card">
-        <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=253680&amp;type=card">
-      </div>
+      </div-->
     </div>
   </div>
   <div id="chat_bar">

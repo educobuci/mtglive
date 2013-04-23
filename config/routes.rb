@@ -4,6 +4,7 @@ Mtglive::Application.routes.draw do
   end
     
   match ':controller(/:action(/:id))(.:format)'
+  
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
