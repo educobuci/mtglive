@@ -15,7 +15,7 @@ class GameExtension
     if message['channel'] == '/meta/subscribe'
       @players = []
       player_id = message['subscription'].gsub(/\/play\//, "")
-      #if players.size < 2
+      #if @players.size < 2
         @players.push({ player: Player.new, client_id: message['client_id'], player_id: player_id, index: 0 })
         @players.push({ player: Player.new, client_id: 0, player_id: "fake", index: 1 })
         #if @players.size == 2
