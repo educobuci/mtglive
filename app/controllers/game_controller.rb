@@ -3,6 +3,8 @@ class GameController < ApplicationController
   respond_to :html, :json
   @@game = nil
   def main
+    Mtglive::Application.reload_routes!
+    render text: "reset"
     unless params[:reset].nil?
       @@game = nil
     end

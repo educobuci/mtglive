@@ -7,23 +7,26 @@ class Game
 end
 
 class GameExtension
+  
   def initialize
     @players = []
+    @test_mode = false
   end
   
   def incoming(message, callback)
     if message['channel'] == '/meta/subscribe'
-      @players = []
+      @players = [] if @test_mode
       player_id = message['subscription'].gsub(/\/play\//, "")
-      #if @players.size < 2
-        @players.push({ player: Player.new, client_id: message['client_id'], player_id: player_id, index: 0 })
-        @players.push({ player: Player.new, client_id: 0, player_id: "fake", index: 1 })
-        #if @players.size == 2
+      if @players.size < 2 || @test_mode
+        @players.push({ player: Player.new, client_id: message['clientId'], player_id: player_id, index: @players.size })
+        @players.push({ player: Player.new, client_id: 0, player_id: "fake", index: 1 }) if @test_mode
+        if @players.size == 2 || @test_mode
           start_game()
-        #end
-      #end
-    elsif message['channel'].include?("/play")
-      player = @players.select { |p| p.client_id == message['client_id'] }
+        end
+      end
+    elsif message['channel'] == "/play"
+      player = (@players.select{ |p| p.client_id == message['clientId'] })[0]
+      puts player[:index]
       player_action(player, {
         type: message['data']['type'],
         value: message['data']['value']
@@ -35,13 +38,27 @@ class GameExtension
   
   def player_action(player, action)
     case action.type
-    when "start_player"
-      puts action.to_s
-      @game.start_player(player.index, action.value.to_i)
-      @game.draw_hands()
-      broadcast "hand" do |p|
-        p.player.hand
-      end
+      when "start_player"
+        @game.start_player(player[:index], action.value.to_i)
+        @game.draw_hands()
+        broadcast "hand" do |p|
+          p[:player].hand
+        end
+      when "keep"
+        @game.keep(player[:index])
+        @game.keep(1) if @test_mode
+        if @game.state == :keep
+          @game.start()
+          broadcast "start" do
+            { game: "this will be the game data" }
+          end          
+        end
+        
+      when "mulligan"
+        @game.mulligan(player[:index])
+        broadcast "hand" do |p|
+          p[:player].hand
+        end
     end
   end
   
@@ -60,7 +77,7 @@ class GameExtension
   
   def broadcast(type, &block)
     @players.each do |p|
-      faye_client.publish "/play/#{p.player_id}",{
+      faye_client.publish "/play/#{p.player_id}", {
         type: type,
         value: block.call(p)
       }

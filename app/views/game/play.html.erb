@@ -6,6 +6,16 @@
   {{/each}}
 </script>
 
+<script type="text/x-handlebars" data-template-name="dialog">
+  <div class="dialog_box">
+    <p>{{text}}</p>
+    <div class="buttons">
+      {{#each buttons}}
+        <button {{action "onButtonClick" on="click"}}>{{this}}</button>
+      {{/each}}
+    </div>
+  </div>
+</script>
 <div id="frame">
   <div id="players_bar">
     <div class="player">
@@ -118,5 +128,6 @@
     </div>
   </div>
   <div id="chat_bar">
+    <button onClick="resetServer()">Reset</button>
   </div>
 </div>
