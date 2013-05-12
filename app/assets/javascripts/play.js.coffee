@@ -3,6 +3,10 @@ window.App = Em.Application.create()
 window.App.PlayerHandView = Ember.View.create
   templateName: "cards"
   cards: []
+  onCardClick: (evt) ->
+    cardDiv = $(evt.target).parent()
+    index = cardDiv.attr("data-number")
+    client.publish "/play", { type: "play_card", value: index }
   
 window.App.DialogView = Ember.View.create
   templateName: "dialog"
@@ -11,9 +15,19 @@ window.App.DialogView = Ember.View.create
   handler: null
   onButtonClick: (evt) ->
     this.get('handler')($(evt.target).text())
-  
+    
+window.App.PlayerBoardView = Ember.View.create
+  templateName: "cards"
+  cards: []
+  onCardClick: (evt) ->
+    cardDiv = $(evt.target).parent()
+    index = cardDiv.attr("data-number")
+    client.publish "/play", { type: "tap_card", value: index }
+
 $ ->
+  $("#user_name").focus()
   App.PlayerHandView.appendTo "#hand"
+  App.PlayerBoardView.appendTo "#player_board .lands"
   
   resizeBar = ->
     height = Math.max($(window).height(), 600)
@@ -26,18 +40,17 @@ $ ->
   
   window.resetServer = ->
     $.get "/game/main", ->
-      showDialog "Server reset!"
+      window.location.reload()
   
   $(window).resize ->
     resizeBar()
   
-  client = new Faye.Client 'http://localhost:3000/faye'
+  window.client = new Faye.Client 'http://localhost:3000/faye'
   userName = null
   opponent = null
   mulligan = 0
   onMessage = (msg) ->
     console.dir(msg)
-    
     switch msg.type
       when "roll_dices"
         for p of msg.value
@@ -50,17 +63,42 @@ $ ->
         else
           showDialog "Waiting #{opponent} decide"
       when "hand"
-        App.PlayerHandView.set "cards", msg.value.map (obj, index) ->
+        App.PlayerHandView.set "cards", msg.value.player.hand.map (obj, index) ->
           Em.Object.create obj, { number: index }
-        showDialog "Want to mulligan to #{Math.max(0, msg.value.length - 1)}?", ['Yes', 'No'], (value) ->
+        showDialog "Want to mulligan to #{Math.max(0, msg.value.player.hand.length - 1)}?", ['Yes', 'No'], (value) ->
           if value == "Yes"
             client.publish "/play", { type: "mulligan" }
           else
             showDialog "Waiting for #{opponent}"
             client.publish "/play", { type: "keep" }
-      when "start"
-        showDialog "Game start"
+      when "info"
+        App.PlayerHandView.set "cards", msg.value.player.hand.map (obj, index) ->
+          Em.Object.create obj, { number: index }
+
+        App.PlayerBoardView.set "cards", msg.value.player.board.map (obj, index) ->
+          Em.Object.create obj, { number: index }
+          
+        handlePhase(msg.value.phase)
   
+  handlePhase = (phase) ->
+    showDialog "Phase #{phase}", ["Ok"],  ->
+      showDialog "Waiting for #{opponent}."
+      client.publish "/play", { type: "pass" }
+    
+    # switch phase
+    #   when "first_main"
+    #     showDialog "Main phase. Cast spells and activate abilities.", ["Ok"],  ->
+    #       showDialog "Waiting for #{opponent}."
+    #       client.publish "/play", { type: "pass" }
+    #   when "begin_combat"
+    #     showDialog "Begin combat. Select attackers.", ["Ok"],  ->
+    #       showDialog "Waiting for #{opponent}."
+    #       client.publish "/play", { type: "pass" } 
+    #   when "begin_combat"
+    #     showDialog "Begin combat. Select attackers.", ["Ok"],  ->
+    #       showDialog "Waiting for #{opponent}."
+    #       client.publish "/play", { type: "pass" }
+              
   showDialog = (text, buttons, handler) ->
     App.DialogView.set "text", text
     App.DialogView.set "buttons", buttons

@@ -7,10 +7,9 @@ class Game
 end
 
 class GameExtension
-  
   def initialize
     @players = []
-    @test_mode = false
+    @test_mode = true
   end
   
   def incoming(message, callback)
@@ -41,37 +40,78 @@ class GameExtension
       when "start_player"
         @game.start_player(player[:index], action.value.to_i)
         @game.draw_hands()
-        broadcast "hand" do |p|
-          p[:player].hand
-        end
+        broadcast_info "hand"
+      when "mulligan"
+        @game.mulligan(player[:index])
+        broadcast_info "hand"
       when "keep"
         @game.keep(player[:index])
         @game.keep(1) if @test_mode
         if @game.state == :keep
           @game.start()
-          broadcast "start" do
-            { game: "this will be the game data" }
-          end          
+          broadcast_info
         end
+      when "play_card"
+        @game.play_card(player[:index], action.value.to_i)
+        broadcast_info
+      when "tap_card"
+        @game.tap_card(player[:index], action.value.to_i)
+        broadcast "info" do |p|
+          self.player_info(p)
+        end
+      when "pass"
+        @game.pass(player[:index])
+        @game.pass(1) if @test_mode        
+        opponent = player[:index] == 0 ? 1 : 0
         
-      when "mulligan"
-        @game.mulligan(player[:index])
-        broadcast "hand" do |p|
-          p[:player].hand
-        end
+        faye_client.publish "/play/#{@players[opponent][:player_id]}", {
+          type: "pass",
+          info: player_info(opponent)
+        }
     end
+  end
+  
+  def player_info(player)
+    opponent = @players[player[:index] == 0 ? 1 : 0]
+    return {
+      player: {
+        hand: player[:player].hand,
+        library: player[:player].library.size,
+        board: player[:player].board,
+      },
+      phase: @game.current_phase,
+      current_player: @players[@game.current_player_index][:player_id],
+      opponent: { hand: opponent.player.hand, library: opponent.player.library.size, board: opponent.player.board }
+    }
   end
   
   def start_game
     @game = Game.new(@players.map { |p| p.player })
+    @game.phase_manager.add_observer self
     dices = @game.roll_dices()
     
     # Test dices roll
-    @game.die_winner=0
-    dices = [6,2]
+    if @test_mode
+      @game.die_winner=0
+      dices = [6, 2]
+    end
     
     broadcast "roll_dices" do
       { @players[0].player_id => dices[0], @players[1].player_id => dices[1] }
+    end
+  end
+  
+  def update(status, phase)
+    broadcast_info "info"
+  end
+  
+  def broadcast_info(type="info", &block)
+    broadcast type do |p|
+      unless block.nil?
+        block.call.merge player_info(p)
+      else
+        player_info(p)
+      end
     end
   end
   

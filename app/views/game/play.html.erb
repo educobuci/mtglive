@@ -1,6 +1,6 @@
 <script type="text/x-handlebars" data-template-name="cards">
   {{#each cards}}
-  <div {{bindAttr data-number="number"}} {{bindAttr class=":card tapped:tapped"}}>
+  <div {{action onCardClick}} {{bindAttr data-number="number"}} {{bindAttr data-name="name"}} {{bindAttr class=":card tapped:tapped"}}>
     <img {{bindAttr src="image"}}>
   </div>
   {{/each}}
@@ -53,7 +53,7 @@
         <li class="end_combat">End Combat</li>
         <li class="main">Main</li>
         <li class="end">End</li>
-    </ul>
+      </ul>
     </div>
     <div id="dialog">
       <form id="login">
@@ -105,7 +105,7 @@
       </div>      
     </div>
     <div class="wrapper">
-      <div class="board">
+      <div id="player_board" class="board">
           <div class="creatures">
             <!-- <div class="card">
               <img src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=235597&amp;type=card">    
