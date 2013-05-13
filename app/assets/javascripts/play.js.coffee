@@ -77,13 +77,17 @@ $ ->
 
         App.PlayerBoardView.set "cards", msg.value.player.board.map (obj, index) ->
           Em.Object.create obj, { number: index }
-          
-        handlePhase(msg.value.phase)
-  
-  handlePhase = (phase) ->
-    showDialog "Phase #{phase}", ["Ok"],  ->
-      showDialog "Waiting for #{opponent}."
-      client.publish "/play", { type: "pass" }
+        
+        if msg.value.current_player == userName
+          showDialog "Phase #{msg.value.phase}", ["Ok"],  ->
+            showDialog "Waiting for #{opponent}."
+            client.publish "/play", { type: "pass" }
+        else
+          showDialog "Waiting for #{opponent}."
+        
+      when "pass"
+        showDialog "Phase #{msg.value.phase}", ["Ok"],  ->
+          client.publish "/play", { type: "pass" }    
     
     # switch phase
     #   when "first_main"

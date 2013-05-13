@@ -9,7 +9,7 @@ end
 class GameExtension
   def initialize
     @players = []
-    @test_mode = true
+    @test_mode = false
   end
   
   def incoming(message, callback)
@@ -25,20 +25,25 @@ class GameExtension
       end
     elsif message['channel'] == "/play"
       player = (@players.select{ |p| p.client_id == message['clientId'] })[0]
-      puts player[:index]
       player_action(player, {
         type: message['data']['type'],
         value: message['data']['value']
       })
     end
     puts message.to_s
+    puts "___________________________________________________________"
     callback.call(message)
   end
   
   def player_action(player, action)
     case action.type
       when "start_player"
-        @game.start_player(player[:index], action.value.to_i)
+        if action.value.to_i == 0
+          start_index = player[:index]
+        else
+          start_index = player[:index] == 0 ? 1 : 0
+        end
+        @game.start_player(player[:index], start_index)
         @game.draw_hands()
         broadcast_info "hand"
       when "mulligan"
@@ -62,12 +67,15 @@ class GameExtension
       when "pass"
         @game.pass(player[:index])
         @game.pass(1) if @test_mode        
-        opponent = player[:index] == 0 ? 1 : 0
         
-        faye_client.publish "/play/#{@players[opponent][:player_id]}", {
-          type: "pass",
-          info: player_info(opponent)
-        }
+        if player[:index] == @game.current_player_index
+          opponent = @players[player[:index] == 0 ? 1 : 0]
+
+          faye_client.publish "/play/#{opponent[:player_id]}", {
+            type: "pass",
+            value: player_info(opponent)
+          }
+        end
     end
   end
   
