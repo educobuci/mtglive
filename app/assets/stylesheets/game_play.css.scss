@@ -17,7 +17,7 @@ body { font-family:arial; color:white; background:black; width:100%; height:100%
   img {
     height:100%;
     border-radius:4.5%;
-    opacity:0.1;
+    opacity:1;
   }
   transform:rotate(90deg);
 }
@@ -106,10 +106,17 @@ body { font-family:arial; color:white; background:black; width:100%; height:100%
  .board {
     height:100%;
     background: darkgray;
+    .card {
+      padding-right:4%;
+    }
+    .tapped {
+      margin-top:2.5%;
+    }
   }
   .lands, .creatures {
     height:50%;
     padding:5px;
+    overflow:hidden;
   }
   #hand {
     padding:6px 10px;

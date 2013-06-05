@@ -9,7 +9,7 @@ end
 class GameExtension
   def initialize
     @players = []
-    @test_mode = false
+    @test_mode = true
   end
   
   def incoming(message, callback)
@@ -66,7 +66,7 @@ class GameExtension
         end
       when "pass"
         @game.pass(player[:index])
-        @game.pass(1) if @test_mode        
+        @game.pass(1) if @test_mode
         
         if player[:index] == @game.current_player_index
           opponent = @players[player[:index] == 0 ? 1 : 0]

@@ -24,10 +24,19 @@ window.App.PlayerBoardView = Ember.View.create
     index = cardDiv.attr("data-number")
     client.publish "/play", { type: "tap_card", value: index }
 
+window.App.PlayerLandsView = Ember.View.create
+  templateName: "cards"
+  cards: []
+  onCardClick: (evt) ->
+    cardDiv = $(evt.target).parent()
+    index = cardDiv.attr("data-number")
+    client.publish "/play", { type: "tap_card", value: index }
+
 $ ->
   $("#user_name").focus()
   App.PlayerHandView.appendTo "#hand"
-  App.PlayerBoardView.appendTo "#player_board .lands"
+  App.PlayerBoardView.appendTo "#player_board .creatures"
+  App.PlayerLandsView.appendTo "#player_board .lands"
   
   resizeBar = ->
     height = Math.max($(window).height(), 600)
@@ -75,7 +84,14 @@ $ ->
         App.PlayerHandView.set "cards", msg.value.player.hand.map (obj, index) ->
           Em.Object.create obj, { number: index }
 
-        App.PlayerBoardView.set "cards", msg.value.player.board.map (obj, index) ->
+        lands = msg.value.player.board.filter (c) -> "land" in c.types
+        
+        App.PlayerLandsView.set "cards", lands.map (obj, index) ->
+          Em.Object.create obj, { number: index }
+          
+        creatures = msg.value.player.board.filter (c) -> "creature" in c.types
+
+        App.PlayerBoardView.set "cards", creatures.map (obj, index) ->
           Em.Object.create obj, { number: index }
         
         if msg.value.current_player == userName
@@ -86,7 +102,7 @@ $ ->
           showDialog "Waiting for #{opponent}."
         
       when "pass"
-        showDialog "Phase #{msg.value.phase}", ["Ok"],  ->
+        showDialog "#{opponent}'s #{msg.value.phase}", ["Ok"],  ->
           client.publish "/play", { type: "pass" }    
     
     # switch phase
