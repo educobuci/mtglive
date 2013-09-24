@@ -29,10 +29,14 @@ class GameExtension
         type: message['data']['type'],
         value: message['data']['value']
       })
+      
+      unless message['data']['type'] == "info"
+        puts message.to_s
+        puts "___________________________________________________________"
+        end
     end
-    puts message.to_s
-    puts "___________________________________________________________"
-    callback.call(message)
+    
+    callback.call(message)   
   end
   
   def player_action(player, action)
@@ -66,7 +70,18 @@ class GameExtension
         end
       when "pass"
         @game.pass(player[:index])
-        @game.pass(1) if @test_mode
+        
+        if @test_mode
+          @game.pass(1)
+          if @game.current_player_index == 1
+            @game.pass(1)
+            
+            faye_client.publish "/play/#{@players[0][:player_id]}", {
+              type: "pass",
+              value: player_info(@players[0])
+            }
+          end
+        end
         
         if player[:index] == @game.current_player_index
           opponent = @players[player[:index] == 0 ? 1 : 0]
